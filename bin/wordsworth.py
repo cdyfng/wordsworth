@@ -21,6 +21,7 @@ from __future__ import print_function # for Python 2 backwards compatibility
 from blessings import Terminal
 import collections
 import re
+from youdao import youdao
 
 # Blessings for terminal colors
 term  = Terminal()
@@ -45,6 +46,7 @@ class wordsworth:
     previous_quad = ''
     max_n_word = 4
     n_words = []
+    sentences =  []
     prev_n_words = []
     counters = []
 
@@ -98,6 +100,48 @@ class wordsworth:
                     ' = ' + purple + str(perc)[:5] + '%' + normal + ')'))
 
 
+    def print_just_word(self, n_word_counter):
+        total_entries = sum(n_word_counter.values())
+        unique_entries = len(n_word_counter)
+        if total_entries > 0:
+            m = n_word_counter.most_common(min(unique_entries, args.top_n))
+            n = len(m[0][0].split(' '))
+
+            print('\n===' + blue + ' Just Commonest ' + str(n) + '-words' + normal + '===')
+
+            for i in range(0, min(unique_entries, args.top_n)):
+                n_word = m[i][0]
+                count = m[i][1]
+                #perc = 100.0 * (count / float(total_entries))
+
+                print(n_word)
+                #print((str(i + 1) + ' = ' + purple + n_word +
+                #       normal + ' (' + purple + str(count).split('.')[0] + normal +
+                #       ' = ' + purple + str(perc)[:5] + '%' + normal + ')'))
+
+    def translate_word(self, n_word_counter, sentences):
+        total_entries = sum(n_word_counter.values())
+        unique_entries = len(n_word_counter)
+        if total_entries > 0:
+            m = n_word_counter.most_common(min(unique_entries, args.top_n))
+            n = len(m[0][0].split(' '))
+
+            print('\n===' + blue + ' Just Commonest ' + str(n) + '-words' + normal + '===')
+
+            for i in range(0, min(unique_entries, args.top_n)):
+                n_word = m[i][0]
+                count = m[i][1]
+                example_sentences = []
+                #perc = 100.0 * (count / float(total_entries))
+                for sentence in sentences:
+                    if n_word in sentence:
+                        example_sentences.append(sentence)
+
+                print(red + n_word + normal + "     " + "".join(example_sentences))
+                youdao.lookup(n_word)
+
+
+
     def print_results(self):
         print('\n===' + blue + ' RESULTS ' + normal + '===')
 
@@ -145,6 +189,10 @@ class wordsworth:
 
         print('Lexical density = ' + str(self.word_stats['lexical_density'])[:5] + '%')
 
+        #print just all one word
+        #self.print_just_word(self.counters[0])
+        self.translate_word(self.counters[0], self.sentences)
+
     def init_word_counters(self):
         self.max_n_word = args.max_n_word
         self.n_words = ['' for i in range(self.max_n_word)]
@@ -154,10 +202,28 @@ class wordsworth:
 
     def read_file(self):
         print("[+] Analysing '" + args.inputfile + "'")
+        file = open(args.inputfile).read()
         if args.allow_digits:
-            self.words = re.findall(r"['\-\w]+", open(args.inputfile).read().lower())
+            self.words = re.findall(r"['\-\w]+", file.lower())
         else:
-            self.words = re.findall(r"['\-A-Za-z]+", open(args.inputfile).read().lower())
+            self.words = re.findall(r"['\-A-Za-z]+", file.lower())
+
+        #self.sentences = re.findall(r"\n['A-Za-z.; ]+\n", file)
+        self.sentences = re.findall(r".+", file)
+        print("sentence:", len(self.sentences))
+        #for item in self.sentences:
+        #    print(item)
+
+
+    def read_ignore_file(self):
+        if(args.ignore_file is False):
+            return
+
+        print("[+] Igonre file'" + args.ignore_file + "'")
+        if args.allow_digits:
+            self.ignore_list.extend(re.findall(r"['\-\w]+", open(args.ignore_file).read().lower()))
+        else:
+            self.ignore_list.extend(re.findall(r"['\-A-Za-z]+", open(args.ignore_file).read().lower()))
 
 
     def compute_stats(self):
@@ -230,11 +296,13 @@ if __name__ == '__main__':
     parser.add_argument('--top', '-t', dest='top_n', required=False, default=20, type=int, help='List the top t most frequent n-words. Default is 20.')
     parser.add_argument('--allow-digits', '-d', dest='allow_digits', default=False, required=False, help='Allow digits to be parsed (true/false). Default is false.')
     parser.add_argument('--ignore', '-i', dest='ignore_list', required=False, help='Comma-delimted list of things to ignore')
+    parser.add_argument('--ignorefile', '-if', dest='ignore_file', required=False, default=False, help='words to ignore from file')
 
     args = parser.parse_args()
 
     w = wordsworth(args)
     w.init_word_counters()
     w.read_file()
+    w.read_ignore_file()
     w.compute_stats()
     w.print_results()

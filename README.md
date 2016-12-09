@@ -1,3 +1,14 @@
+美剧新看法：
+1. 下载对应字幕文件 samples/zimu.txt
+2. 准备好认识的单词库 samples/ignores.txt
+3. python bin/wordsworth.py -f samples/zimu.txt -if samples/ignores.txt -n 1 -t 5000
+
+基于wordsworth做的修改， 加入了有道的api翻译。
+
+0. 环境搭建 pip install -r requirment.txt
+
+![Alt text](/screenshots/screenshot8.png?raw=true "screenshot8.png")
+
 wordsworth
 ==========
 Here is an example of some typical output you can expect to see.
