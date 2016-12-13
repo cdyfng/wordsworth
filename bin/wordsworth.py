@@ -49,6 +49,8 @@ class wordsworth:
     sentences =  []
     prev_n_words = []
     counters = []
+    words_out_file = open("out.txt", 'w')
+
 
     word_stats = {
                   'total_chars': 0,
@@ -136,9 +138,14 @@ class wordsworth:
                 for sentence in sentences:
                     if n_word in sentence:
                         example_sentences.append(sentence)
-
-                print(red + n_word + normal + "     " + "".join(example_sentences))
-                youdao.lookup(n_word)
+                try:
+                    print(red + n_word + normal + "     " + "".join(example_sentences))
+                    youdao.lookup(n_word)
+                    self.words_out_file.write(n_word + '\n')
+                except Exception, e:
+                    print(yellow + n_word)
+                    print(e)
+            self.words_out_file.close( )
 
 
 
@@ -209,10 +216,11 @@ class wordsworth:
             self.words = re.findall(r"['\-A-Za-z]+", file.lower())
 
         #self.sentences = re.findall(r"\n['A-Za-z.; ]+\n", file)
-        self.sentences = re.findall(r".+", file)
+        self.sentences = re.findall(r"[A-Z].+?[\.\?;]", file)
         print("sentence:", len(self.sentences))
         #for item in self.sentences:
         #    print(item)
+        #    print('\n')
 
 
     def read_ignore_file(self):
