@@ -139,8 +139,9 @@ class wordsworth:
                     if n_word in sentence:
                         example_sentences.append(sentence)
                 try:
-                    print(red + n_word + normal + "     " + "".join(example_sentences))
-                    youdao.lookup(n_word)
+                    print(red + n_word + normal + "     " + "".join(example_sentences) + blue)
+                    if args.translate:
+                        youdao.lookup(n_word)
                     self.words_out_file.write(n_word + '\n')
                 except Exception, e:
                     print(yellow + n_word)
@@ -238,6 +239,7 @@ class wordsworth:
         for word in self.words:
         
             if word in self.ignore_list:
+                #print("ignore:", word)
                 continue
         
             word = word.strip(r"&^%$#@!")
@@ -305,6 +307,7 @@ if __name__ == '__main__':
     parser.add_argument('--allow-digits', '-d', dest='allow_digits', default=False, required=False, help='Allow digits to be parsed (true/false). Default is false.')
     parser.add_argument('--ignore', '-i', dest='ignore_list', required=False, help='Comma-delimted list of things to ignore')
     parser.add_argument('--ignorefile', '-if', dest='ignore_file', required=False, default=False, help='words to ignore from file')
+    parser.add_argument('--translate', '-tl', dest='translate', required=False, default=False, help='translate by youdao api')
 
     args = parser.parse_args()
 
